@@ -7,6 +7,7 @@
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
 <style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Space+Grotesk:wght@400;500;600;700&display=swap');
   :root{
     --bg:#0d1117; --panel:#151b23; --panel2:#1c242e; --line:#2a3441;
     --ink:#e6edf3; --muted:#8b98a5; --dim:#5c6b7a;
@@ -15,14 +16,9 @@
     --mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
     --sans:"Space Grotesk",-apple-system,BlinkMacSystemFont,Segoe UI,sans-serif;
   }
-  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Space+Grotesk:wght@400;500;600;700&display=swap');
   *{box-sizing:border-box}
-  body{
-    margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);
-    font-size:14px;line-height:1.5;
-    background-image:radial-gradient(circle at 12% 0%,rgba(47,129,247,.06),transparent 40%),radial-gradient(circle at 92% 10%,rgba(77,212,172,.05),transparent 38%);
-    min-height:100vh;
-  }
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:14px;line-height:1.5;min-height:100vh;
+    background-image:radial-gradient(circle at 12% 0%,rgba(47,129,247,.06),transparent 40%),radial-gradient(circle at 92% 10%,rgba(77,212,172,.05),transparent 38%);}
   .wrap{max-width:980px;margin:0 auto;padding:28px 20px 80px}
   header{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;margin-bottom:6px}
   h1{font-size:22px;font-weight:700;letter-spacing:-.5px;margin:0}
@@ -31,36 +27,22 @@
   .panel{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:18px;margin-top:16px}
   .panel h2{font-size:13px;text-transform:uppercase;letter-spacing:1.2px;color:var(--muted);margin:0 0 14px;font-weight:600}
   label{display:block;font-size:12px;color:var(--muted);margin-bottom:5px}
-  input[type=text]{
-    width:100%;background:var(--panel2);border:1px solid var(--line);border-radius:8px;
-    color:var(--ink);padding:9px 11px;font-family:var(--mono);font-size:13px;outline:none;
-  }
+  input[type=text]{width:100%;background:var(--panel2);border:1px solid var(--line);border-radius:8px;color:var(--ink);padding:9px 11px;font-family:var(--mono);font-size:13px;outline:none}
   input[type=text]:focus{border-color:var(--accent2)}
   .row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
   @media(max-width:640px){.row{grid-template-columns:1fr}}
   .field{margin-bottom:12px}
-  button{
-    font-family:var(--sans);font-weight:600;font-size:13px;cursor:pointer;
-    border-radius:8px;padding:10px 16px;border:1px solid var(--line);
-    background:var(--panel2);color:var(--ink);transition:.15s;
-  }
+  button{font-family:var(--sans);font-weight:600;font-size:13px;cursor:pointer;border-radius:8px;padding:10px 16px;border:1px solid var(--line);background:var(--panel2);color:var(--ink);transition:.15s}
   button:hover:not(:disabled){border-color:var(--accent);color:#fff}
   button:disabled{opacity:.4;cursor:not-allowed}
   button.primary{background:var(--accent);color:#06231b;border-color:var(--accent)}
   button.primary:hover:not(:disabled){filter:brightness(1.08);color:#06231b}
-  button.danger{background:var(--closed);color:#2a0606;border-color:var(--closed)}
-  button.ghost{background:transparent}
   .btnrow{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:6px}
   .pill{font-family:var(--mono);font-size:11px;padding:3px 9px;border-radius:20px;border:1px solid var(--line);color:var(--muted)}
   .pill.ok{color:var(--new);border-color:rgba(63,185,80,.4)}
-  .pill.warn{color:var(--upd);border-color:rgba(210,153,34,.4)}
   .pill.err{color:var(--closed);border-color:rgba(248,81,73,.4)}
-  .file-drop{
-    border:1.5px dashed var(--line);border-radius:10px;padding:22px;text-align:center;color:var(--muted);
-    cursor:pointer;transition:.15s;background:var(--panel2)
-  }
-  .file-drop:hover{border-color:var(--accent);color:var(--ink)}
-  .file-drop.has{border-style:solid;border-color:var(--accent);color:var(--ink)}
+  .linkbtn{background:none;border:none;color:var(--accent2);cursor:pointer;font-size:12.5px;padding:0;font-family:var(--sans)}
+  .linkbtn:hover{text-decoration:underline}
   table{width:100%;border-collapse:collapse;font-family:var(--mono);font-size:12.5px}
   th,td{text-align:left;padding:7px 9px;border-bottom:1px solid var(--line)}
   th{color:var(--dim);font-weight:500;text-transform:uppercase;font-size:10.5px;letter-spacing:.6px}
@@ -102,7 +84,7 @@
 <div class="wrap">
   <header>
     <h1>IBKR <span class="arrow">&rarr;</span> Sheets Sync</h1>
-    <span class="sub">positions &amp; cost basis to STOCKS / CEF+BDC / ETFS</span>
+    <span class="sub">Flex auto-fetch &middot; STOCKS / CEF+BDC / ETFS</span>
   </header>
 
   <!-- CONNECT -->
@@ -118,33 +100,44 @@
         <input type="text" id="sheetId" placeholder="from the sheet URL: /d/<THIS_PART>/edit" autocomplete="off">
       </div>
     </div>
+    <div class="field">
+      <label>Flex relay URL (your Cloudflare Worker)</label>
+      <input type="text" id="relayUrl" placeholder="https://flex-relay.yourname.workers.dev" autocomplete="off">
+    </div>
+    <div class="row">
+      <div class="field">
+        <label>IBKR Flex token</label>
+        <input type="text" id="flexToken" placeholder="from IBKR Flex Web Service" autocomplete="off">
+      </div>
+      <div class="field">
+        <label>Flex Query ID</label>
+        <input type="text" id="queryId" placeholder="your Activity Flex Query ID" autocomplete="off">
+      </div>
+    </div>
     <div class="btnrow">
       <button id="authBtn" class="primary">Authorize Google</button>
       <span class="pill" id="authStatus"><span class="status-dot"></span>not connected</span>
     </div>
-    <p class="note">Client ID and Spreadsheet ID are saved in this browser only. Nothing is sent anywhere except Google's Sheets API as you.</p>
+    <p class="note">All values are saved in this browser only and sent to your own relay over HTTPS. The relay never logs the token.</p>
   </div>
 
   <!-- ALIASES -->
   <div class="panel">
     <h2>2 &middot; Symbol aliases <span style="text-transform:none;letter-spacing:0;color:var(--dim)">(IBKR symbol &rarr; sheet symbol)</span></h2>
     <div id="aliasList"></div>
-    <div class="btnrow">
-      <button id="addAlias" class="ghost">+ Add mapping</button>
-    </div>
+    <div class="btnrow"><button id="addAlias">+ Add mapping</button></div>
   </div>
 
-  <!-- FILE -->
+  <!-- FETCH -->
   <div class="panel">
-    <h2>3 &middot; Statement</h2>
-    <div class="file-drop" id="drop">
-      <input type="file" id="file" accept=".csv" class="hidden">
-      <span id="dropLabel">Click to choose your IBKR Activity Statement (.csv)</span>
-    </div>
-    <div class="btnrow" style="margin-top:14px">
-      <button id="analyzeBtn" disabled>Analyze</button>
+    <h2>3 &middot; Positions</h2>
+    <div class="btnrow">
+      <button id="fetchBtn" class="primary" disabled>Fetch from IBKR &amp; analyze</button>
+      <button id="uploadToggle" class="linkbtn">or upload a CSV instead</button>
       <span class="pill" id="rateInfo"></span>
     </div>
+    <input type="file" id="file" accept=".csv" class="hidden">
+    <p class="note">Pulls your open positions through the relay, converts cost basis to USD, and diffs against the three sheets. Flex data is end-of-day, not intraday.</p>
   </div>
 
   <!-- PLAN -->
@@ -154,9 +147,7 @@
     <div id="planGroups"></div>
     <div class="convbox hidden" id="convNote"></div>
     <label class="checkbox"><input type="checkbox" id="confirm"> I reviewed this plan and want to write it to the sheet</label>
-    <div class="btnrow">
-      <button id="applyBtn" class="primary" disabled>Apply to Google Sheet</button>
-    </div>
+    <div class="btnrow"><button id="applyBtn" class="primary" disabled>Apply to Google Sheet</button></div>
   </div>
 
   <!-- LOG -->
@@ -166,14 +157,13 @@
   </div>
 
   <details class="help">
-    <summary>One-time setup (Google Cloud + GitHub Pages)</summary>
+    <summary>One-time setup (Cloudflare relay + Google + IBKR Flex)</summary>
     <ol>
-      <li>In <b>Google Cloud Console</b> &rarr; APIs &amp; Services, enable the <b>Google Sheets API</b>.</li>
-      <li>Configure the <b>OAuth consent screen</b> (External, app name, your email). Add yourself under <b>Test users</b>. It can stay in "Testing" mode.</li>
-      <li>Create an <b>OAuth client ID</b> of type <b>Web application</b>. Under <b>Authorized JavaScript origins</b>, add the exact origin where this page is hosted, e.g. <code>https://yourname.github.io</code> (no path, no trailing slash).</li>
-      <li>Copy the Client ID into the field above.</li>
-      <li>Host this file on <b>GitHub Pages</b> (public repo on the free plan) so the origin is stable. Open it from that URL, not from a local file.</li>
-      <li>Open your Google Sheet, copy the ID from the URL (the part between <code>/d/</code> and <code>/edit</code>) into the field above.</li>
+      <li><b>IBKR Flex query.</b> Client Portal &rarr; Performance &amp; Reports &rarr; Flex Queries. Create an <b>Activity Flex Query</b> with the <b>Open Positions</b> section, Summary level of detail, including Symbol, Quantity, Cost Basis, Currency, FX Rate To Base, Asset Category, Sub Category. Format XML. Note the <b>Query ID</b>.</li>
+      <li><b>IBKR Flex token.</b> In the same area enable the <b>Flex Web Service</b> and generate a <b>token</b>.</li>
+      <li><b>Cloudflare Worker.</b> Create a Worker, paste <code>flex-relay-worker.js</code>, set its <code>ALLOWED_ORIGIN</code> to your Pages origin, and add the variable <code>ALLOWED_EMAIL</code> (your Google address). Deploy and copy the Worker URL into the field above. The Flex token and Query ID are entered on this page, not in the Worker.</li>
+      <li><b>Google.</b> Enable the Sheets API, set the OAuth consent screen to External + Testing with yourself as a Test user, and create a Web application OAuth client whose Authorized JavaScript origin is your Pages origin (host only, no path). Paste the Client ID above.</li>
+      <li><b>Host</b> this file on GitHub Pages and open it from that URL. Paste the Spreadsheet ID (the part of the sheet URL between <code>/d/</code> and <code>/edit</code>).</li>
     </ol>
   </details>
 </div>
@@ -181,295 +171,247 @@
 <script>
 "use strict";
 
-/* ---------- sheet layout (1-based cols documented, stored as letters) ---------- */
+/* ---- sheet layout ---- */
 const SHEETS = {
-  "STOCKS":  { symbol:"A",  type:"Y",  pos:"Z",  inv:"AA" },
-  "CEF+BDC": { symbol:"A",  type:"L",  pos:"U",  inv:"V"  },
-  "ETFS":    { symbol:"B",  type:"AC", pos:"AF", inv:"AG" },
+  "STOCKS":  { symbol:"A",  type:"Y",  pos:"Z",  inv:"AA", peak:"AE" },
+  "CEF+BDC": { symbol:"A",  type:"L",  pos:"U",  inv:"V",  peak:"AB" },
+  "ETFS":    { symbol:"B",  type:"AC", pos:"AF", inv:"AG", peak:"AJ" },
 };
 const SHEET_ORDER = ["STOCKS","CEF+BDC","ETFS"];
-const RED = { red:0.902, green:0.224, blue:0.208 };
-
+const RED   = { red:0.902, green:0.224, blue:0.208 };
+const WHITE = { red:1, green:1, blue:1 };   // "no fill" look, clears any prior red
 const DEFAULT_ALIASES = [
-  { ibkr:"PBR A",   sheet:"PBR.A"   },
-  { ibkr:"DX PRC",  sheet:"DX-C"    },
-  { ibkr:"NLY PRF", sheet:"NLY-F"   },
-  { ibkr:"SOI",     sheet:"EPA:SOI" },
+  { ibkr:"PBR A", sheet:"PBR.A" }, { ibkr:"DX PRC", sheet:"DX-C" },
+  { ibkr:"NLY PRF", sheet:"NLY-F" }, { ibkr:"SOI", sheet:"EPA:SOI" },
 ];
 
-/* ---------- tiny helpers ---------- */
+/* ---- helpers ---- */
 const $ = id => document.getElementById(id);
-const colToIdx = s => { let n=0; for(const c of s.toUpperCase()) n=n*26+(c.charCodeAt(0)-64); return n-1; }; // 0-based
+const colToIdx = s => { let n=0; for(const c of s.toUpperCase()) n=n*26+(c.charCodeAt(0)-64); return n-1; };
 const up = s => String(s==null?"":s).trim().toUpperCase();
 const isBench = s => { const u=up(s); return u===""||u==="SYMBOL"||u==="VIX"||u.startsWith("."); };
 const numfmt = (v,d=2) => (v==null||isNaN(v))?"" : Number(v).toLocaleString("en-US",{maximumFractionDigits:d});
 const qtyfmt = v => (v==null||isNaN(v))?"" : (Math.abs(v%1)<1e-9 ? String(Math.round(v)) : Number(v).toFixed(6).replace(/0+$/,"").replace(/\.$/,""));
 
-/* ---------- state ---------- */
-let accessToken = null, tokenClient = null, gisReady = false;
-let parsed = null;   // {positions, types, rates, eurRate}
-let plan = null;
+/* ---- state ---- */
+let accessToken=null, tokenClient=null, parsed=null, plan=null, csvText=null;
 
-/* ---------- persistence ---------- */
-function loadCfg(){
-  $("clientId").value = localStorage.getItem("ibkr_clientId") || "";
-  $("sheetId").value  = localStorage.getItem("ibkr_sheetId")  || "";
-  let aliases;
-  try { aliases = JSON.parse(localStorage.getItem("ibkr_aliases")); } catch(e){}
-  if(!Array.isArray(aliases) || !aliases.length) aliases = DEFAULT_ALIASES.slice();
-  renderAliases(aliases);
-}
+/* ---- persistence ---- */
+window.onload=()=>{
+  $("clientId").value=localStorage.getItem("ibkr_clientId")||"";
+  $("sheetId").value =localStorage.getItem("ibkr_sheetId")||"";
+  $("relayUrl").value=localStorage.getItem("ibkr_relayUrl")||"";
+  $("flexToken").value=localStorage.getItem("ibkr_flexToken")||"";
+  $("queryId").value=localStorage.getItem("ibkr_queryId")||"";
+  let a; try{a=JSON.parse(localStorage.getItem("ibkr_aliases"));}catch(e){}
+  if(!Array.isArray(a)||!a.length) a=DEFAULT_ALIASES.slice();
+  renderAliases(a);
+};
 function saveCfg(){
   localStorage.setItem("ibkr_clientId",$("clientId").value.trim());
   localStorage.setItem("ibkr_sheetId",$("sheetId").value.trim());
+  localStorage.setItem("ibkr_relayUrl",$("relayUrl").value.trim());
+  localStorage.setItem("ibkr_flexToken",$("flexToken").value.trim());
+  localStorage.setItem("ibkr_queryId",$("queryId").value.trim());
   localStorage.setItem("ibkr_aliases",JSON.stringify(readAliases()));
 }
-$("clientId").addEventListener("change",saveCfg);
-$("sheetId").addEventListener("change",saveCfg);
+["clientId","sheetId","relayUrl","flexToken","queryId"].forEach(id=>$(id).addEventListener("change",()=>{saveCfg();refreshButtons();}));
 
-/* ---------- alias UI ---------- */
-function renderAliases(list){
-  const box=$("aliasList"); box.innerHTML="";
-  list.forEach(a=>box.appendChild(aliasRow(a.ibkr,a.sheet)));
-}
+/* ---- aliases ---- */
+function renderAliases(list){ const b=$("aliasList"); b.innerHTML=""; list.forEach(a=>b.appendChild(aliasRow(a.ibkr,a.sheet))); }
 function aliasRow(ibkr="",sheet=""){
-  const div=document.createElement("div"); div.className="alias-row";
-  div.innerHTML=`<input type="text" class="a-ibkr" value="${ibkr.replace(/"/g,'&quot;')}" placeholder="IBKR symbol">
+  const d=document.createElement("div"); d.className="alias-row";
+  d.innerHTML=`<input type="text" class="a-ibkr" value="${ibkr.replace(/"/g,'&quot;')}" placeholder="IBKR symbol">
     <span class="eq">&rarr;</span>
     <input type="text" class="a-sheet" value="${sheet.replace(/"/g,'&quot;')}" placeholder="sheet symbol">
     <span class="x" title="remove">&times;</span>`;
-  div.querySelector(".x").onclick=()=>{div.remove();saveCfg();};
-  div.querySelectorAll("input").forEach(i=>i.addEventListener("change",saveCfg));
-  return div;
+  d.querySelector(".x").onclick=()=>{d.remove();saveCfg();};
+  d.querySelectorAll("input").forEach(i=>i.addEventListener("change",saveCfg));
+  return d;
 }
-$("addAlias").onclick=()=>{ $("aliasList").appendChild(aliasRow()); };
-function readAliases(){
-  return [...document.querySelectorAll(".alias-row")].map(r=>({
-    ibkr:r.querySelector(".a-ibkr").value.trim(),
-    sheet:r.querySelector(".a-sheet").value.trim()
-  })).filter(a=>a.ibkr && a.sheet);
-}
+$("addAlias").onclick=()=>$("aliasList").appendChild(aliasRow());
+function readAliases(){ return [...document.querySelectorAll(".alias-row")].map(r=>({
+  ibkr:r.querySelector(".a-ibkr").value.trim(), sheet:r.querySelector(".a-sheet").value.trim()
+})).filter(a=>a.ibkr&&a.sheet); }
 function aliasMap(){ const m={}; readAliases().forEach(a=>m[up(a.ibkr)]=a.sheet); return m; }
 
-/* ---------- auth ---------- */
-window.onload=loadCfg;
-function ensureGis(){
-  if(window.google && google.accounts && google.accounts.oauth2){ gisReady=true; return true; }
-  return false;
-}
+/* ---- auth ---- */
 $("authBtn").onclick=()=>{
   const cid=$("clientId").value.trim();
   if(!cid){ alert("Enter your OAuth Client ID first."); return; }
   saveCfg();
-  if(!ensureGis()){ alert("Google library still loading, try again in a moment."); return; }
-  tokenClient = google.accounts.oauth2.initTokenClient({
-    client_id: cid,
-    scope: "https://www.googleapis.com/auth/spreadsheets",
-    callback: (resp)=>{
-      if(resp && resp.access_token){
-        accessToken = resp.access_token;
-        setAuth(true);
-      } else { setAuth(false); }
-    },
+  if(!(window.google&&google.accounts&&google.accounts.oauth2)){ alert("Google library still loading, try again."); return; }
+  tokenClient=google.accounts.oauth2.initTokenClient({
+    client_id:cid, scope:"https://www.googleapis.com/auth/spreadsheets",
+    callback:r=>{ if(r&&r.access_token){accessToken=r.access_token;setAuth(true);} else setAuth(false); },
   });
-  tokenClient.requestAccessToken({prompt: accessToken ? "" : "consent"});
+  tokenClient.requestAccessToken({prompt:accessToken?"":"consent"});
 };
-function setAuth(on){
-  const el=$("authStatus");
-  el.className = "pill "+(on?"ok":"err");
-  el.innerHTML = `<span class="status-dot ${on?"on":""}"></span>${on?"connected":"not connected"}`;
-  refreshAnalyze();
-}
+function setAuth(on){ const e=$("authStatus"); e.className="pill "+(on?"ok":"err");
+  e.innerHTML=`<span class="status-dot ${on?"on":""}"></span>${on?"connected":"not connected"}`; refreshButtons(); }
+function refreshButtons(){ $("fetchBtn").disabled=!(accessToken&&$("relayUrl").value.trim()&&$("sheetId").value.trim()); }
 
-/* ---------- file ---------- */
-let csvText=null;
-$("drop").onclick=()=>$("file").click();
-$("file").onchange=e=>{
-  const f=e.target.files[0]; if(!f) return;
-  const r=new FileReader();
-  r.onload=()=>{ csvText=r.result; $("drop").classList.add("has");
-    $("dropLabel").textContent="\u2713 "+f.name; refreshAnalyze(); };
+/* ---- CSV fallback ---- */
+$("uploadToggle").onclick=()=>$("file").click();
+$("file").onchange=e=>{ const f=e.target.files[0]; if(!f) return;
+  const r=new FileReader(); r.onload=async()=>{ csvText=r.result;
+    try{ parsed=parseCSV(csvText); await afterParse("CSV "+f.name); }catch(err){ alert(err.message); } };
   r.readAsText(f);
 };
-function refreshAnalyze(){ $("analyzeBtn").disabled = !(csvText); }
 
-/* ---------- CSV / statement parse ---------- */
-function parseStatement(text){
-  text = text.replace(/^\uFEFF/,"");
-  // drop a leading "sep=," directive line if present
-  text = text.replace(/^sep=.*\r?\n/i,"");
-  const rows = Papa.parse(text,{header:false,skipEmptyLines:true}).data;
-  const positions=[], types={}, rates={USD:1};
-  for(const row of rows){
-    if(!row || row.length<2) continue;
-    const sec=row[0];
-    if(sec==="Open Positions" && row[1]==="Data" && row[2]==="Summary"){
-      positions.push({
-        symbol: String(row[5]).trim(),
-        currency: String(row[4]).trim(),
-        qty: parseFloat(row[6]),
-        costBasis: parseFloat(row[9]),
-      });
-    } else if(sec==="Financial Instrument Information" && row[1]==="Data"){
-      types[up(row[3])] = String(row[10]||"").trim().toUpperCase();
-    } else if(sec==="Base Currency Exchange Rate" && row[1]==="Data"){
-      const r=parseFloat(row[3]); if(!isNaN(r)) rates[String(row[2]).trim()]=r;
-    }
-  }
-  return { positions, types, rates, eurRate: rates.EUR };
+/* ---- Flex fetch via relay ---- */
+$("fetchBtn").onclick=async()=>{
+  try{
+    saveCfg();
+    if(!accessToken){ alert("Authorize Google first."); return; }
+    const url=$("relayUrl").value.trim(); if(!url){ alert("Enter the Flex relay URL."); return; }
+    const flexToken=$("flexToken").value.trim(), queryId=$("queryId").value.trim();
+    if(!flexToken||!queryId){ alert("Enter your IBKR Flex token and Query ID."); return; }
+    $("fetchBtn").disabled=true; $("fetchBtn").textContent="Fetching from IBKR\u2026";
+    const r=await fetch(url,{method:"POST",headers:{Authorization:"Bearer "+accessToken,"Content-Type":"application/json"},
+      body:JSON.stringify({flexToken,queryId})});
+    const txt=await r.text();
+    if(!r.ok){ let m=txt; try{const j=JSON.parse(txt); m=(j.error||"")+" "+(j.message||j.detail||"");}catch(e){} throw new Error("Relay: "+m.trim()); }
+    parsed=parseFlexXML(txt);
+    await afterParse("Flex "+(parsed.asOf||""));
+  }catch(e){ logShow(); logLine("err",e.message); alert(e.message); }
+  finally{ $("fetchBtn").disabled=false; $("fetchBtn").textContent="Fetch from IBKR & analyze"; }
+};
+
+async function afterParse(srcLabel){
+  $("rateInfo").textContent=`${srcLabel} \u00b7 ${parsed.positions.length} pos \u00b7 EUR/USD ${parsed.rates.EUR||"?"}`;
+  const data=await readSheets();
+  plan=buildPlan(parsed,data);
+  renderPlan(plan);
 }
 
-/* ---------- sheets API ---------- */
+/* ---- parse: Flex XML ---- */
+function parseFlexXML(xmlText){
+  const doc=new DOMParser().parseFromString(xmlText,"application/xml");
+  if(doc.querySelector("parsererror")) throw new Error("Could not parse Flex XML.");
+  const stmt=doc.querySelector("FlexStatement");
+  const asOf=stmt?(stmt.getAttribute("toDate")||""):"";
+  const rates={USD:1}; const agg={};
+  doc.querySelectorAll("OpenPosition").forEach(op=>{
+    const cat=op.getAttribute("assetCategory");
+    if(cat && cat!=="STK") return;
+    const symbol=(op.getAttribute("symbol")||"").trim();
+    const currency=(op.getAttribute("currency")||"USD").trim();
+    const qty=parseFloat(op.getAttribute("position"));
+    const cb=parseFloat(op.getAttribute("costBasisMoney"));
+    const fx=parseFloat(op.getAttribute("fxRateToBase"));
+    const sub=(op.getAttribute("subCategory")||"").trim().toUpperCase();
+    if(!symbol||isNaN(qty)) return;
+    if(!isNaN(fx)&&fx>0) rates[currency]=fx;
+    const k=symbol+"|"+currency;
+    if(!agg[k]) agg[k]={symbol,currency,qty:0,costBasis:0,isETF:false};
+    agg[k].qty+=qty; if(!isNaN(cb)) agg[k].costBasis+=cb; if(sub==="ETF") agg[k].isETF=true;
+  });
+  doc.querySelectorAll("ConversionRate").forEach(cr=>{
+    const f=(cr.getAttribute("fromCurrency")||"").trim(), t=(cr.getAttribute("toCurrency")||"").trim();
+    const r=parseFloat(cr.getAttribute("rate"));
+    if(t==="USD"&&f&&!isNaN(r)&&rates[f]==null) rates[f]=r;
+  });
+  const positions=Object.values(agg);
+  if(!positions.length) throw new Error("No STK open positions found in the Flex statement.");
+  return { positions, rates, asOf };
+}
+
+/* ---- parse: Activity Statement CSV (fallback) ---- */
+function parseCSV(text){
+  text=text.replace(/^\uFEFF/,"").replace(/^sep=.*\r?\n/i,"");
+  const rows=Papa.parse(text,{header:false,skipEmptyLines:true}).data;
+  const positions=[], types={}, rates={USD:1};
+  for(const r of rows){
+    if(!r||r.length<2) continue;
+    if(r[0]==="Open Positions"&&r[1]==="Data"&&r[2]==="Summary"){
+      positions.push({symbol:String(r[5]).trim(),currency:String(r[4]).trim(),qty:parseFloat(r[6]),costBasis:parseFloat(r[9]),isETF:false});
+    } else if(r[0]==="Financial Instrument Information"&&r[1]==="Data"){
+      types[up(r[3])]=String(r[10]||"").trim().toUpperCase();
+    } else if(r[0]==="Base Currency Exchange Rate"&&r[1]==="Data"){
+      const v=parseFloat(r[3]); if(!isNaN(v)) rates[String(r[2]).trim()]=v;
+    }
+  }
+  positions.forEach(p=>p.isETF=(types[up(p.symbol)]||"")==="ETF");
+  if(!positions.length) throw new Error("No Open Positions Summary rows found in the CSV.");
+  return { positions, rates, asOf:"" };
+}
+
+/* ---- sheets read ---- */
 async function api(url,opts={}){
-  const r=await fetch(url,{...opts,headers:{Authorization:"Bearer "+accessToken,
-    "Content-Type":"application/json",...(opts.headers||{})}});
-  if(r.status===401){ accessToken=null; setAuth(false); throw new Error("Authorization expired, click Authorize Google again."); }
-  if(!r.ok){ const t=await r.text(); throw new Error("Sheets API "+r.status+": "+t.slice(0,300)); }
+  const r=await fetch(url,{...opts,headers:{Authorization:"Bearer "+accessToken,"Content-Type":"application/json",...(opts.headers||{})}});
+  if(r.status===401){ accessToken=null; setAuth(false); throw new Error("Google authorization expired, click Authorize Google again."); }
+  if(!r.ok){ throw new Error("Sheets API "+r.status+": "+(await r.text()).slice(0,300)); }
   return r.json();
 }
 function sid(){ return encodeURIComponent($("sheetId").value.trim()); }
-function q(name){ return "'"+name.replace(/'/g,"''")+"'"; }
+function q(n){ return "'"+n.replace(/'/g,"''")+"'"; }
 
 async function readSheets(){
-  // metadata: sheetId + grid size
   const meta=await api(`https://sheets.googleapis.com/v4/spreadsheets/${sid()}?fields=sheets(properties(sheetId,title,gridProperties(rowCount,columnCount)))`);
-  const props={};
-  meta.sheets.forEach(s=>props[s.properties.title]=s.properties);
-  for(const name of SHEET_ORDER){ if(!props[name]) throw new Error(`Tab "${name}" not found in spreadsheet.`); }
-
-  // values: symbol col + pos col for each sheet
+  const props={}; meta.sheets.forEach(s=>props[s.properties.title]=s.properties);
+  for(const n of SHEET_ORDER) if(!props[n]) throw new Error(`Tab "${n}" not found.`);
   const ranges=[];
-  for(const name of SHEET_ORDER){
-    const c=SHEETS[name];
-    ranges.push(`${q(name)}!${c.symbol}1:${c.symbol}5000`);
-    ranges.push(`${q(name)}!${c.pos}1:${c.pos}5000`);
-  }
-  const url=`https://sheets.googleapis.com/v4/spreadsheets/${sid()}/values:batchGet?`+
-    ranges.map(r=>"ranges="+encodeURIComponent(r)).join("&")+"&majorDimension=ROWS";
-  const vals=await api(url);
-  const vr=vals.valueRanges;
-
+  for(const n of SHEET_ORDER){ const c=SHEETS[n]; ranges.push(`${q(n)}!${c.symbol}1:${c.symbol}5000`); ranges.push(`${q(n)}!${c.pos}1:${c.pos}5000`); }
+  const url=`https://sheets.googleapis.com/v4/spreadsheets/${sid()}/values:batchGet?`+ranges.map(r=>"ranges="+encodeURIComponent(r)).join("&")+"&majorDimension=ROWS";
+  const vr=(await api(url)).valueRanges;
   const data={};
   SHEET_ORDER.forEach((name,i)=>{
     const symCol=vr[i*2].values||[], posCol=vr[i*2+1].values||[];
-    const bySym={}; let lastSymRow=1, lastHeldRow=0;
-    const maxLen=Math.max(symCol.length,posCol.length);
+    const bySym={}; let lastSymRow=1,lastHeldRow=0; const maxLen=Math.max(symCol.length,posCol.length);
     for(let r=0;r<maxLen;r++){
-      const rawSym = (symCol[r]&&symCol[r][0]!=null)?String(symCol[r][0]).trim():"";
-      const rawPos = (posCol[r]&&posCol[r][0]!=null)?String(posCol[r][0]).trim():"";
-      const rowNum=r+1;
-      if(rawSym!=="") lastSymRow=rowNum;
-      const posNum=parseFloat(rawPos.replace(/,/g,""));
-      const held = !isNaN(posNum) && Math.abs(posNum)>0 && rawPos!=="-";
-      if(rawSym!=="" && !isBench(rawSym)){
-        bySym[up(rawSym)]={ row:rowNum, raw:rawSym, held };
-        if(held) lastHeldRow=rowNum;
-      }
+      const s=(symCol[r]&&symCol[r][0]!=null)?String(symCol[r][0]).trim():"";
+      const p=(posCol[r]&&posCol[r][0]!=null)?String(posCol[r][0]).trim():"";
+      const rowNum=r+1; if(s!=="") lastSymRow=rowNum;
+      const pn=parseFloat(p.replace(/,/g,"")); const held=!isNaN(pn)&&Math.abs(pn)>0&&p!=="-";
+      if(s!==""&&!isBench(s)){ bySym[up(s)]={row:rowNum,raw:s,held}; if(held) lastHeldRow=rowNum; }
     }
-    data[name]={
-      sheetId:props[name].sheetId,
+    data[name]={ sheetId:props[name].sheetId,
       colCount:(props[name].gridProperties&&props[name].gridProperties.columnCount)||120,
       rowCount:(props[name].gridProperties&&props[name].gridProperties.rowCount)||1000,
-      cfg:SHEETS[name], bySym, lastSymRow, lastHeldRow:lastHeldRow||lastSymRow,
-    };
+      cfg:SHEETS[name], bySym, lastSymRow, lastHeldRow:lastHeldRow||lastSymRow };
   });
   return data;
 }
 
-/* ---------- reconcile ---------- */
+/* ---- reconcile ---- */
 function buildPlan(parsed,data){
-  const aMap=aliasMap();
-  const rates=parsed.rates;
-  const updates=[], newRows=[], conversions=[];
-  const targetSet=new Set();
-
-  function toUSD(p){
-    const rate = rates[p.currency]!=null ? rates[p.currency] : 1;
-    const usd = p.costBasis*rate;
-    if(p.currency!=="USD") conversions.push({sym:p.symbol,cur:p.currency,orig:p.costBasis,rate,usd});
-    return usd;
-  }
-  function find(sheetSymUp){
-    for(const name of SHEET_ORDER){ if(data[name].bySym[sheetSymUp]) return {name,...data[name].bySym[sheetSymUp]}; }
-    return null;
-  }
-
-  const newCounters={STOCKS:0,"CEF+BDC":0,ETFS:0};
+  const aMap=aliasMap(), rates=parsed.rates;
+  const updates=[], newRows=[], conversions=[], targetSet=new Set();
+  const toUSD=p=>{ const r=rates[p.currency]!=null?rates[p.currency]:1; const usd=p.costBasis*r;
+    if(p.currency!=="USD") conversions.push({sym:p.symbol,cur:p.currency,orig:p.costBasis,rate:r,usd}); return usd; };
+  const find=u=>{ for(const n of SHEET_ORDER) if(data[n].bySym[u]) return {name:n,...data[n].bySym[u]}; return null; };
+  const ctr={STOCKS:0,"CEF+BDC":0,ETFS:0};
   for(const p of parsed.positions){
-    if(!p.symbol || isNaN(p.qty)) continue;
-    const sheetSym = aMap[up(p.symbol)] || p.symbol;
-    const symUp = up(sheetSym);
-    targetSet.add(symUp);
-    const invUSD = toUSD(p);
-    const hit = find(symUp);
-    if(hit){
-      updates.push({ sheet:hit.name, row:hit.row, symbol:hit.raw, qty:p.qty, inv:invUSD, currency:p.currency });
-    } else {
-      const isETF = (parsed.types[up(p.symbol)]||"")==="ETF";
-      const dest = isETF ? "ETFS" : "STOCKS";
-      const d=data[dest];
-      const row = d.lastSymRow + 1 + newCounters[dest];
-      newCounters[dest]++;
-      newRows.push({ sheet:dest, row, symbol:sheetSym, qty:p.qty, inv:invUSD,
-                     currency:p.currency, template:d.lastHeldRow, isETF });
-    }
+    if(!p.symbol||isNaN(p.qty)) continue;
+    const sheetSym=aMap[up(p.symbol)]||p.symbol, u=up(sheetSym); targetSet.add(u);
+    const inv=toUSD(p), hit=find(u);
+    if(hit){ updates.push({sheet:hit.name,row:hit.row,symbol:hit.raw,qty:p.qty,inv,currency:p.currency}); }
+    else{ const dest=p.isETF?"ETFS":"STOCKS", d=data[dest], row=d.lastSymRow+1+ctr[dest]; ctr[dest]++;
+      newRows.push({sheet:dest,row,symbol:sheetSym,qty:p.qty,inv,currency:p.currency,template:d.lastHeldRow,isETF:p.isETF}); }
   }
-
-  // closed = held rows on a sheet whose symbol is not in any IBKR target
   const closed=[];
-  for(const name of SHEET_ORDER){
-    for(const [symUp,info] of Object.entries(data[name].bySym)){
-      if(info.held && !targetSet.has(symUp)){
-        closed.push({ sheet:name, row:info.row, symbol:info.raw });
-      }
-    }
-  }
+  for(const n of SHEET_ORDER) for(const [u,info] of Object.entries(data[n].bySym))
+    if(info.held&&!targetSet.has(u)) closed.push({sheet:n,row:info.row,symbol:info.raw});
   return { updates, newRows, closed, conversions };
 }
 
-/* ---------- analyze ---------- */
-$("analyzeBtn").onclick=async()=>{
-  try{
-    if(!accessToken){ alert("Authorize Google first."); return; }
-    if(!$("sheetId").value.trim()){ alert("Enter the Spreadsheet ID."); return; }
-    saveCfg();
-    $("analyzeBtn").disabled=true; $("analyzeBtn").textContent="Analyzing\u2026";
-    parsed = parseStatement(csvText);
-    $("rateInfo").textContent = `EUR/USD ${parsed.eurRate||"?"} \u00b7 ${parsed.positions.length} positions`;
-    const data = await readSheets();
-    plan = buildPlan(parsed,data);
-    renderPlan(plan);
-  }catch(e){ logLine("err",e.message); alert(e.message); }
-  finally{ $("analyzeBtn").disabled=false; $("analyzeBtn").textContent="Analyze"; }
-};
-
-/* ---------- plan UI ---------- */
+/* ---- plan UI ---- */
 function renderPlan(plan){
   $("planPanel").classList.remove("hidden");
-  const sum=$("planSummary");
-  sum.innerHTML =
-    `<span class="pill warn">${plan.updates.length} update</span>`+
-    `<span class="pill ok">${plan.newRows.length} new</span>`+
-    `<span class="pill err">${plan.closed.length} closed</span>`;
-
+  $("planSummary").innerHTML=`<span class="pill" style="color:var(--upd)">${plan.updates.length} update</span>
+    <span class="pill ok">${plan.newRows.length} new</span><span class="pill err">${plan.closed.length} closed</span>`;
   const g=$("planGroups"); g.innerHTML="";
-  g.appendChild(group("Updates","upd",plan.updates,
-     ["sheet","symbol","qty","inv USD"],
-     u=>[u.sheet,u.symbol,qtyfmt(u.qty),numfmt(u.inv)+(u.currency!=="USD"?` <span class="tag conv">${u.currency}</span>`:"")],true));
-  g.appendChild(group("New rows","new",plan.newRows,
-     ["dest","symbol","qty","inv USD","from row"],
-     n=>[n.sheet+(n.isETF?' <span class="tag new">ETF</span>':""),n.symbol,qtyfmt(n.qty),numfmt(n.inv)+(n.currency!=="USD"?` <span class="tag conv">${n.currency}</span>`:""),"copy "+n.template]));
-  g.appendChild(group("Closed (ticker reddened, pos+cost cleared)","closed",plan.closed,
-     ["sheet","symbol","row"],
-     c=>[c.sheet,c.symbol,c.row]));
-
+  g.appendChild(group("Updates (ticker cleared to no fill)","upd",plan.updates,["sheet","symbol","qty","inv USD"],
+    u=>[u.sheet,u.symbol,qtyfmt(u.qty),numfmt(u.inv)+(u.currency!=="USD"?` <span class="tag conv">${u.currency}</span>`:"")],true));
+  g.appendChild(group("New rows (Peak Gain left blank)","new",plan.newRows,["dest","symbol","qty","inv USD","from row"],
+    n=>[n.sheet+(n.isETF?' <span class="tag new">ETF</span>':""),n.symbol,qtyfmt(n.qty),numfmt(n.inv)+(n.currency!=="USD"?` <span class="tag conv">${n.currency}</span>`:""),"copy "+n.template]));
+  g.appendChild(group("Closed (ticker reddened, pos+cost cleared)","closed",plan.closed,["sheet","symbol","row"],
+    c=>[c.sheet,c.symbol,c.row]));
   const cn=$("convNote");
-  if(plan.conversions.length){
-    cn.classList.remove("hidden");
-    cn.innerHTML="<b>FX conversions to USD:</b><br>"+plan.conversions.map(c=>
-      `${c.sym}: ${numfmt(c.orig)} ${c.cur} \u00d7 ${c.rate} = ${numfmt(c.usd)} USD`).join("<br>");
+  if(plan.conversions.length){ cn.classList.remove("hidden");
+    cn.innerHTML="<b>FX conversions to USD:</b><br>"+plan.conversions.map(c=>`${c.sym}: ${numfmt(c.orig)} ${c.cur} \u00d7 ${c.rate} = ${numfmt(c.usd)} USD`).join("<br>");
   } else cn.classList.add("hidden");
-
   $("confirm").checked=false; $("applyBtn").disabled=true;
 }
 function group(title,cls,items,cols,rowFn,openByDefault){
@@ -478,87 +420,66 @@ function group(title,cls,items,cols,rowFn,openByDefault){
   head.innerHTML=`<span class="chev">&#9656;</span><span class="tag ${cls}">${title}</span><span class="count">${items.length}</span>`;
   const body=document.createElement("div"); body.className="grp-body"+(openByDefault?" open":"");
   if(items.length){
-    let html="<table><thead><tr>"+cols.map(c=>`<th>${c}</th>`).join("")+"</tr></thead><tbody>";
-    for(const it of items){
-      const cells=rowFn(it);
-      html+="<tr>"+cells.map((v,i)=>`<td class="${i>=2?'num':''}">${v}</td>`).join("")+"</tr>";
-    }
-    html+="</tbody></table>";
-    body.innerHTML=html;
+    let h="<table><thead><tr>"+cols.map(c=>`<th>${c}</th>`).join("")+"</tr></thead><tbody>";
+    for(const it of items){ const c=rowFn(it); h+="<tr>"+c.map((v,i)=>`<td class="${i>=2?'num':''}">${v}</td>`).join("")+"</tr>"; }
+    body.innerHTML=h+"</tbody></table>";
   } else body.innerHTML=`<p class="note">none</p>`;
   head.onclick=()=>{head.classList.toggle("open");body.classList.toggle("open");};
-  wrap.appendChild(head); wrap.appendChild(body);
-  return wrap;
+  wrap.appendChild(head); wrap.appendChild(body); return wrap;
 }
-$("confirm").onchange=e=>{ $("applyBtn").disabled=!e.target.checked; };
+$("confirm").onchange=e=>$("applyBtn").disabled=!e.target.checked;
 
-/* ---------- apply ---------- */
+/* ---- apply ---- */
 $("applyBtn").onclick=async()=>{
   if(!plan) return;
-  $("applyBtn").disabled=true; $("applyBtn").textContent="Writing\u2026";
-  $("logPanel").classList.remove("hidden"); $("log").innerHTML="";
+  $("applyBtn").disabled=true; $("applyBtn").textContent="Writing\u2026"; logShow(); $("log").innerHTML="";
   try{
-    const data = await readSheets();          // re-read for fresh rows/ids
-    plan = buildPlan(parsed,data);            // recompute against current state
-    const idStr=sid();
-
-    /* ----- pass 1: structure + formatting (copyPaste new rows, red closed, clear closed) ----- */
+    const data=await readSheets(); plan=buildPlan(parsed,data); const idStr=sid();
     const requests=[];
+    // new rows: copy template down, then blank Peak Gain
     for(const n of plan.newRows){
       const d=data[n.sheet];
-      if(n.row>d.rowCount){ logLine("err",`${n.sheet}: row ${n.row} exceeds grid; add blank rows to the tab first.`); continue; }
-      requests.push({ copyPaste:{
+      if(n.row>d.rowCount){ logLine("err",`${n.sheet}: row ${n.row} exceeds grid; add blank rows first.`); continue; }
+      requests.push({copyPaste:{
         source:{sheetId:d.sheetId,startRowIndex:n.template-1,endRowIndex:n.template,startColumnIndex:0,endColumnIndex:d.colCount},
         destination:{sheetId:d.sheetId,startRowIndex:n.row-1,endRowIndex:n.row,startColumnIndex:0,endColumnIndex:d.colCount},
-        pasteType:"PASTE_NORMAL",pasteOrientation:"NORMAL"
-      }});
+        pasteType:"PASTE_NORMAL",pasteOrientation:"NORMAL"}});
+      const pk=colToIdx(d.cfg.peak);
+      requests.push({updateCells:{range:{sheetId:d.sheetId,startRowIndex:n.row-1,endRowIndex:n.row,startColumnIndex:pk,endColumnIndex:pk+1},
+        rows:[{values:[{}]}],fields:"userEnteredValue"}});
     }
-    for(const c of plan.closed){
-      const d=data[c.sheet], cfg=d.cfg;
-      const symIdx=colToIdx(cfg.symbol), posIdx=colToIdx(cfg.pos), invIdx=colToIdx(cfg.inv);
-      requests.push({ repeatCell:{
-        range:{sheetId:d.sheetId,startRowIndex:c.row-1,endRowIndex:c.row,startColumnIndex:symIdx,endColumnIndex:symIdx+1},
-        cell:{userEnteredFormat:{backgroundColor:RED}}, fields:"userEnteredFormat.backgroundColor"
-      }});
-      const lo=Math.min(posIdx,invIdx), hi=Math.max(posIdx,invIdx);
-      requests.push({ updateCells:{
-        range:{sheetId:d.sheetId,startRowIndex:c.row-1,endRowIndex:c.row,startColumnIndex:lo,endColumnIndex:hi+1},
-        rows:[{values:[{},{}]}], fields:"userEnteredValue"
-      }});
+    // open positions (updates + new): clear ticker cell fill to none
+    const whiten=[...plan.updates.map(u=>({sheet:u.sheet,row:u.row})),...plan.newRows.map(n=>({sheet:n.sheet,row:n.row}))];
+    for(const w of whiten){ const d=data[w.sheet], si=colToIdx(d.cfg.symbol);
+      requests.push({repeatCell:{range:{sheetId:d.sheetId,startRowIndex:w.row-1,endRowIndex:w.row,startColumnIndex:si,endColumnIndex:si+1},
+        cell:{userEnteredFormat:{backgroundColor:WHITE}},fields:"userEnteredFormat.backgroundColor"}}); }
+    // closed: redden ticker cell, clear pos+inv
+    for(const c of plan.closed){ const d=data[c.sheet], cfg=d.cfg;
+      const si=colToIdx(cfg.symbol), pi=colToIdx(cfg.pos), ii=colToIdx(cfg.inv), lo=Math.min(pi,ii), hi=Math.max(pi,ii);
+      requests.push({repeatCell:{range:{sheetId:d.sheetId,startRowIndex:c.row-1,endRowIndex:c.row,startColumnIndex:si,endColumnIndex:si+1},
+        cell:{userEnteredFormat:{backgroundColor:RED}},fields:"userEnteredFormat.backgroundColor"}});
+      requests.push({updateCells:{range:{sheetId:d.sheetId,startRowIndex:c.row-1,endRowIndex:c.row,startColumnIndex:lo,endColumnIndex:hi+1},
+        rows:[{values:[{},{}]}],fields:"userEnteredValue"}});
     }
     if(requests.length){
-      await api(`https://sheets.googleapis.com/v4/spreadsheets/${idStr}:batchUpdate`,
-        {method:"POST",body:JSON.stringify({requests})});
-      logLine("ok",`structure pass: ${plan.newRows.length} rows copied, ${plan.closed.length} closed.`);
+      await api(`https://sheets.googleapis.com/v4/spreadsheets/${idStr}:batchUpdate`,{method:"POST",body:JSON.stringify({requests})});
+      logLine("ok",`structure: ${plan.newRows.length} new, ${whiten.length} cleared to none, ${plan.closed.length} closed.`);
     }
-
-    /* ----- pass 2: values (updates + new-row stamps), RAW ----- */
     const valueData=[];
-    function put(name,a1,vals){ valueData.push({range:`${q(name)}!${a1}`,values:[vals]}); }
-    for(const u of plan.updates){
-      const cfg=data[u.sheet].cfg;
-      put(u.sheet,`${cfg.pos}${u.row}:${cfg.inv}${u.row}`,[u.qty,u.inv]);
-    }
-    for(const n of plan.newRows){
-      const cfg=data[n.sheet].cfg;
-      put(n.sheet,`${cfg.symbol}${n.row}`,[n.symbol]);
-      put(n.sheet,`${cfg.pos}${n.row}:${cfg.inv}${n.row}`,[n.qty,n.inv]);
-    }
+    const put=(n,a1,vals)=>valueData.push({range:`${q(n)}!${a1}`,values:[vals]});
+    for(const u of plan.updates){ const cfg=data[u.sheet].cfg; put(u.sheet,`${cfg.pos}${u.row}:${cfg.inv}${u.row}`,[u.qty,u.inv]); }
+    for(const n of plan.newRows){ const cfg=data[n.sheet].cfg; put(n.sheet,`${cfg.symbol}${n.row}`,[n.symbol]); put(n.sheet,`${cfg.pos}${n.row}:${cfg.inv}${n.row}`,[n.qty,n.inv]); }
     if(valueData.length){
-      await api(`https://sheets.googleapis.com/v4/spreadsheets/${idStr}/values:batchUpdate`,
-        {method:"POST",body:JSON.stringify({valueInputOption:"RAW",data:valueData})});
-      logLine("ok",`value pass: ${plan.updates.length} updated, ${plan.newRows.length} new stamped.`);
+      await api(`https://sheets.googleapis.com/v4/spreadsheets/${idStr}/values:batchUpdate`,{method:"POST",body:JSON.stringify({valueInputOption:"RAW",data:valueData})});
+      logLine("ok",`values: ${plan.updates.length} updated, ${plan.newRows.length} stamped.`);
     }
-    logLine("info","Done.");
-    $("applyBtn").textContent="Applied \u2713";
+    logLine("info","Done."); $("applyBtn").textContent="Applied \u2713";
   }catch(e){ logLine("err",e.message); $("applyBtn").textContent="Apply to Google Sheet"; $("applyBtn").disabled=false; }
 };
 
-function logLine(cls,msg){
-  const d=document.createElement("div"); d.className="l-"+cls;
-  d.textContent=`[${new Date().toLocaleTimeString()}] ${msg}`;
-  $("log").appendChild(d); $("log").scrollTop=$("log").scrollHeight;
-}
+function logShow(){ $("logPanel").classList.remove("hidden"); }
+function logLine(cls,msg){ const d=document.createElement("div"); d.className="l-"+cls;
+  d.textContent=`[${new Date().toLocaleTimeString()}] ${msg}`; $("log").appendChild(d); $("log").scrollTop=$("log").scrollHeight; }
 </script>
 </body>
 </html>
