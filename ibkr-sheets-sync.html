@@ -242,7 +242,7 @@ $("authBtn").onclick=()=>{
   saveCfg();
   if(!(window.google&&google.accounts&&google.accounts.oauth2)){ alert("Google library still loading, try again."); return; }
   tokenClient=google.accounts.oauth2.initTokenClient({
-    client_id:cid, scope:"https://www.googleapis.com/auth/spreadsheets",
+    client_id:cid, scope:"openid email https://www.googleapis.com/auth/spreadsheets",
     callback:r=>{ if(r&&r.access_token){accessToken=r.access_token;setAuth(true);} else setAuth(false); },
   });
   tokenClient.requestAccessToken({prompt:accessToken?"":"consent"});
