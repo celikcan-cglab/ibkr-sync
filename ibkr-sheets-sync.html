@@ -175,7 +175,7 @@
 const SHEETS = {
   "STOCKS":  { symbol:"A",  type:"Y",  pos:"Z",  inv:"AA", peak:"AE" },
   "CEF+BDC": { symbol:"A",  type:"L",  pos:"U",  inv:"V",  peak:"AB" },
-  "ETFS":    { symbol:"B",  type:"AC", pos:"AF", inv:"AG", peak:"AJ" },
+  "ETFS":    { symbol:"B",  type:"AC", pos:"AF", inv:"AG", peak:"AJ", mirror:"A" },
 };
 const SHEET_ORDER = ["STOCKS","CEF+BDC","ETFS"];
 const RED   = { red:0.902, green:0.224, blue:0.208 };
@@ -468,7 +468,7 @@ $("applyBtn").onclick=async()=>{
     const valueData=[];
     const put=(n,a1,vals)=>valueData.push({range:`${q(n)}!${a1}`,values:[vals]});
     for(const u of plan.updates){ const cfg=data[u.sheet].cfg; put(u.sheet,`${cfg.pos}${u.row}:${cfg.inv}${u.row}`,[u.qty,u.inv]); }
-    for(const n of plan.newRows){ const cfg=data[n.sheet].cfg; put(n.sheet,`${cfg.symbol}${n.row}`,[n.symbol]); put(n.sheet,`${cfg.pos}${n.row}:${cfg.inv}${n.row}`,[n.qty,n.inv]); }
+    for(const n of plan.newRows){ const cfg=data[n.sheet].cfg; put(n.sheet,`${cfg.symbol}${n.row}`,[n.symbol]); if(cfg.mirror) put(n.sheet,`${cfg.mirror}${n.row}`,[n.symbol]); put(n.sheet,`${cfg.pos}${n.row}:${cfg.inv}${n.row}`,[n.qty,n.inv]); }
     if(valueData.length){
       await api(`https://sheets.googleapis.com/v4/spreadsheets/${idStr}/values:batchUpdate`,{method:"POST",body:JSON.stringify({valueInputOption:"RAW",data:valueData})});
       logLine("ok",`values: ${plan.updates.length} updated, ${plan.newRows.length} stamped.`);
