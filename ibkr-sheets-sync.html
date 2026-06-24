@@ -171,13 +171,10 @@
 <script>
 "use strict";
 
-/* ---- sheet layout ---- */
-const SHEETS = {
-  "STOCKS":  { symbol:"A",  type:"Y",  pos:"Z",  inv:"AA", peak:"AE" },
-  "CEF+BDC": { symbol:"A",  type:"L",  pos:"U",  inv:"V",  peak:"AB" },
-  "ETFS":    { symbol:"B",  type:"AC", pos:"AF", inv:"AG", peak:"AJ", mirror:"A" },
-};
+/* ---- sheet layout: columns are located by header text in row 1 ---- */
 const SHEET_ORDER = ["STOCKS","CEF+BDC","ETFS"];
+const HDR = { symbol:"SYMBOL", pos:"POS", inv:"INV. TOTAL", peak:"PEAK GAIN" };
+const MIRROR_LEFT = { "ETFS":true };   // also write ticker into the blank helper column just left of Symbol
 const RED   = { red:0.902, green:0.224, blue:0.208 };
 const WHITE = { red:1, green:1, blue:1 };   // "no fill" look, clears any prior red
 const DEFAULT_ALIASES = [
@@ -187,7 +184,8 @@ const DEFAULT_ALIASES = [
 
 /* ---- helpers ---- */
 const $ = id => document.getElementById(id);
-const colToIdx = s => { let n=0; for(const c of s.toUpperCase()) n=n*26+(c.charCodeAt(0)-64); return n-1; };
+const idxToCol = n => { let s=""; n++; while(n>0){ const m=(n-1)%26; s=String.fromCharCode(65+m)+s; n=(n-m-1)/26; } return s; };
+const normHdr = s => String(s==null?"":s).replace(/\s+/g," ").trim().toUpperCase();
 const up = s => String(s==null?"":s).trim().toUpperCase();
 const isBench = s => { const u=up(s); return u===""||u==="SYMBOL"||u==="VIX"||u.startsWith("."); };
 const numfmt = (v,d=2) => (v==null||isNaN(v))?"" : Number(v).toLocaleString("en-US",{maximumFractionDigits:d});
@@ -352,16 +350,29 @@ async function readSheets(){
   const props={}; meta.sheets.forEach(s=>props[s.properties.title]=s.properties);
   for(const n of SHEET_ORDER) if(!props[n]) throw new Error(`Tab "${n}" not found.`);
   const ranges=[];
-  for(const n of SHEET_ORDER){ const c=SHEETS[n]; ranges.push(`${q(n)}!${c.symbol}1:${c.symbol}5000`); ranges.push(`${q(n)}!${c.pos}1:${c.pos}5000`); }
+  for(const n of SHEET_ORDER){
+    const cc=(props[n].gridProperties&&props[n].gridProperties.columnCount)||120;
+    ranges.push(`${q(n)}!A1:${idxToCol(cc-1)}5000`);
+  }
   const url=`https://sheets.googleapis.com/v4/spreadsheets/${sid()}/values:batchGet?`+ranges.map(r=>"ranges="+encodeURIComponent(r)).join("&")+"&majorDimension=ROWS";
   const vr=(await api(url)).valueRanges;
   const data={};
   SHEET_ORDER.forEach((name,i)=>{
-    const symCol=vr[i*2].values||[], posCol=vr[i*2+1].values||[];
-    const bySym={}; let lastSymRow=1,lastHeldRow=0; const maxLen=Math.max(symCol.length,posCol.length);
-    for(let r=0;r<maxLen;r++){
-      const s=(symCol[r]&&symCol[r][0]!=null)?String(symCol[r][0]).trim():"";
-      const p=(posCol[r]&&posCol[r][0]!=null)?String(posCol[r][0]).trim():"";
+    const rows=vr[i].values||[];
+    const header=rows[0]||[];
+    const hmap={}; header.forEach((h,j)=>{ const n=normHdr(h); if(n!==""&&hmap[n]===undefined) hmap[n]=j; });
+    const symIdx=hmap[HDR.symbol], posIdx=hmap[HDR.pos], invIdx=hmap[HDR.inv], peakIdx=hmap[HDR.peak];
+    const missing=[]; if(symIdx===undefined)missing.push(HDR.symbol); if(posIdx===undefined)missing.push(HDR.pos); if(invIdx===undefined)missing.push(HDR.inv);
+    if(missing.length) throw new Error(`Tab "${name}" is missing header(s) in row 1: ${missing.join(", ")}.`);
+    const mirIdx=(MIRROR_LEFT[name]&&symIdx>0)?symIdx-1:null;
+    const idx={sym:symIdx,pos:posIdx,inv:invIdx,peak:(peakIdx===undefined?null:peakIdx),mir:mirIdx};
+    const L={ sym:idxToCol(symIdx), pos:idxToCol(posIdx), inv:idxToCol(invIdx),
+              peak:(idx.peak!=null?idxToCol(idx.peak):null), mir:(mirIdx!=null?idxToCol(mirIdx):null) };
+    const bySym={}; let lastSymRow=1,lastHeldRow=0;
+    for(let r=0;r<rows.length;r++){
+      const row=rows[r]||[];
+      const s=row[symIdx]!=null?String(row[symIdx]).trim():"";
+      const p=row[posIdx]!=null?String(row[posIdx]).trim():"";
       const rowNum=r+1; if(s!=="") lastSymRow=rowNum;
       const pn=parseFloat(p.replace(/,/g,"")); const held=!isNaN(pn)&&Math.abs(pn)>0&&p!=="-";
       if(s!==""&&!isBench(s)){ bySym[up(s)]={row:rowNum,raw:s,held}; if(held) lastHeldRow=rowNum; }
@@ -369,7 +380,7 @@ async function readSheets(){
     data[name]={ sheetId:props[name].sheetId,
       colCount:(props[name].gridProperties&&props[name].gridProperties.columnCount)||120,
       rowCount:(props[name].gridProperties&&props[name].gridProperties.rowCount)||1000,
-      cfg:SHEETS[name], bySym, lastSymRow, lastHeldRow:lastHeldRow||lastSymRow };
+      idx, L, bySym, lastSymRow, lastHeldRow:lastHeldRow||lastSymRow };
   });
   return data;
 }
@@ -436,7 +447,7 @@ $("applyBtn").onclick=async()=>{
   try{
     const data=await readSheets(); plan=buildPlan(parsed,data); const idStr=sid();
     const requests=[];
-    // new rows: copy template down, then blank Peak Gain
+    // new rows: copy template down, then blank Peak Gain (if that column exists)
     for(const n of plan.newRows){
       const d=data[n.sheet];
       if(n.row>d.rowCount){ logLine("err",`${n.sheet}: row ${n.row} exceeds grid; add blank rows first.`); continue; }
@@ -444,22 +455,24 @@ $("applyBtn").onclick=async()=>{
         source:{sheetId:d.sheetId,startRowIndex:n.template-1,endRowIndex:n.template,startColumnIndex:0,endColumnIndex:d.colCount},
         destination:{sheetId:d.sheetId,startRowIndex:n.row-1,endRowIndex:n.row,startColumnIndex:0,endColumnIndex:d.colCount},
         pasteType:"PASTE_NORMAL",pasteOrientation:"NORMAL"}});
-      const pk=colToIdx(d.cfg.peak);
-      requests.push({updateCells:{range:{sheetId:d.sheetId,startRowIndex:n.row-1,endRowIndex:n.row,startColumnIndex:pk,endColumnIndex:pk+1},
-        rows:[{values:[{}]}],fields:"userEnteredValue"}});
+      if(d.idx.peak!=null){
+        requests.push({updateCells:{range:{sheetId:d.sheetId,startRowIndex:n.row-1,endRowIndex:n.row,startColumnIndex:d.idx.peak,endColumnIndex:d.idx.peak+1},
+          rows:[{values:[{}]}],fields:"userEnteredValue"}});
+      }
     }
     // open positions (updates + new): clear ticker cell fill to none
     const whiten=[...plan.updates.map(u=>({sheet:u.sheet,row:u.row})),...plan.newRows.map(n=>({sheet:n.sheet,row:n.row}))];
-    for(const w of whiten){ const d=data[w.sheet], si=colToIdx(d.cfg.symbol);
+    for(const w of whiten){ const d=data[w.sheet], si=d.idx.sym;
       requests.push({repeatCell:{range:{sheetId:d.sheetId,startRowIndex:w.row-1,endRowIndex:w.row,startColumnIndex:si,endColumnIndex:si+1},
         cell:{userEnteredFormat:{backgroundColor:WHITE}},fields:"userEnteredFormat.backgroundColor"}}); }
-    // closed: redden ticker cell, clear pos+inv
-    for(const c of plan.closed){ const d=data[c.sheet], cfg=d.cfg;
-      const si=colToIdx(cfg.symbol), pi=colToIdx(cfg.pos), ii=colToIdx(cfg.inv), lo=Math.min(pi,ii), hi=Math.max(pi,ii);
-      requests.push({repeatCell:{range:{sheetId:d.sheetId,startRowIndex:c.row-1,endRowIndex:c.row,startColumnIndex:si,endColumnIndex:si+1},
+    // closed: redden ticker cell, clear pos and inv (may be non-adjacent)
+    for(const c of plan.closed){ const d=data[c.sheet];
+      requests.push({repeatCell:{range:{sheetId:d.sheetId,startRowIndex:c.row-1,endRowIndex:c.row,startColumnIndex:d.idx.sym,endColumnIndex:d.idx.sym+1},
         cell:{userEnteredFormat:{backgroundColor:RED}},fields:"userEnteredFormat.backgroundColor"}});
-      requests.push({updateCells:{range:{sheetId:d.sheetId,startRowIndex:c.row-1,endRowIndex:c.row,startColumnIndex:lo,endColumnIndex:hi+1},
-        rows:[{values:[{},{}]}],fields:"userEnteredValue"}});
+      for(const ci of [d.idx.pos,d.idx.inv]){
+        requests.push({updateCells:{range:{sheetId:d.sheetId,startRowIndex:c.row-1,endRowIndex:c.row,startColumnIndex:ci,endColumnIndex:ci+1},
+          rows:[{values:[{}]}],fields:"userEnteredValue"}});
+      }
     }
     if(requests.length){
       await api(`https://sheets.googleapis.com/v4/spreadsheets/${idStr}:batchUpdate`,{method:"POST",body:JSON.stringify({requests})});
@@ -467,8 +480,10 @@ $("applyBtn").onclick=async()=>{
     }
     const valueData=[];
     const put=(n,a1,vals)=>valueData.push({range:`${q(n)}!${a1}`,values:[vals]});
-    for(const u of plan.updates){ const cfg=data[u.sheet].cfg; put(u.sheet,`${cfg.pos}${u.row}:${cfg.inv}${u.row}`,[u.qty,u.inv]); }
-    for(const n of plan.newRows){ const cfg=data[n.sheet].cfg; put(n.sheet,`${cfg.symbol}${n.row}`,[n.symbol]); if(cfg.mirror) put(n.sheet,`${cfg.mirror}${n.row}`,[n.symbol]); put(n.sheet,`${cfg.pos}${n.row}:${cfg.inv}${n.row}`,[n.qty,n.inv]); }
+    for(const u of plan.updates){ const L=data[u.sheet].L; put(u.sheet,`${L.pos}${u.row}`,[u.qty]); put(u.sheet,`${L.inv}${u.row}`,[u.inv]); }
+    for(const n of plan.newRows){ const L=data[n.sheet].L;
+      put(n.sheet,`${L.sym}${n.row}`,[n.symbol]); if(L.mir) put(n.sheet,`${L.mir}${n.row}`,[n.symbol]);
+      put(n.sheet,`${L.pos}${n.row}`,[n.qty]); put(n.sheet,`${L.inv}${n.row}`,[n.inv]); }
     if(valueData.length){
       await api(`https://sheets.googleapis.com/v4/spreadsheets/${idStr}/values:batchUpdate`,{method:"POST",body:JSON.stringify({valueInputOption:"RAW",data:valueData})});
       logLine("ok",`values: ${plan.updates.length} updated, ${plan.newRows.length} stamped.`);
