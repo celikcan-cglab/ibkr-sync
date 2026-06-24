@@ -185,6 +185,7 @@ const DEFAULT_ALIASES = [
 /* ---- helpers ---- */
 const $ = id => document.getElementById(id);
 const idxToCol = n => { let s=""; n++; while(n>0){ const m=(n-1)%26; s=String.fromCharCode(65+m)+s; n=(n-m-1)/26; } return s; };
+const groupRanges = idxs => { const r=[]; let a=null,p=null; for(const i of [...idxs].sort((x,y)=>x-y)){ if(a===null){a=i;p=i;} else if(i===p+1){p=i;} else {r.push([a,p]);a=i;p=i;} } if(a!==null) r.push([a,p]); return r; };
 const normHdr = s => String(s==null?"":s).replace(/\s+/g," ").trim().toUpperCase();
 const up = s => String(s==null?"":s).trim().toUpperCase();
 const isBench = s => { const u=up(s); return u===""||u==="SYMBOL"||u==="VIX"||u.startsWith("."); };
@@ -415,7 +416,7 @@ function renderPlan(plan){
   const g=$("planGroups"); g.innerHTML="";
   g.appendChild(group("Updates (ticker cleared to no fill)","upd",plan.updates,["sheet","symbol","qty","inv USD"],
     u=>[u.sheet,u.symbol,qtyfmt(u.qty),numfmt(u.inv)+(u.currency!=="USD"?` <span class="tag conv">${u.currency}</span>`:"")],true));
-  g.appendChild(group("New rows (Peak Gain left blank)","new",plan.newRows,["dest","symbol","qty","inv USD","from row"],
+  g.appendChild(group("New rows (formulas copied down, other cells blank)","new",plan.newRows,["dest","symbol","qty","inv USD","from row"],
     n=>[n.sheet+(n.isETF?' <span class="tag new">ETF</span>':""),n.symbol,qtyfmt(n.qty),numfmt(n.inv)+(n.currency!=="USD"?` <span class="tag conv">${n.currency}</span>`:""),"copy "+n.template]));
   g.appendChild(group("Closed (ticker reddened, pos+cost cleared)","closed",plan.closed,["sheet","symbol","row"],
     c=>[c.sheet,c.symbol,c.row]));
@@ -446,8 +447,26 @@ $("applyBtn").onclick=async()=>{
   $("applyBtn").disabled=true; $("applyBtn").textContent="Writing\u2026"; logShow(); $("log").innerHTML="";
   try{
     const data=await readSheets(); plan=buildPlan(parsed,data); const idStr=sid();
+
+    // For each destination template row, find which columns are NON-formula (static),
+    // so new rows copy only formula cells and leave the rest blank.
+    const tpl={}; for(const n of plan.newRows) tpl[n.sheet]=n.template;
+    const tplSheets=Object.keys(tpl); const staticCols={};
+    if(tplSheets.length){
+      const rng=tplSheets.map(s=>`${q(s)}!A${tpl[s]}:${idxToCol(data[s].colCount-1)}${tpl[s]}`);
+      const u=`https://sheets.googleapis.com/v4/spreadsheets/${idStr}/values:batchGet?`+
+        rng.map(r=>"ranges="+encodeURIComponent(r)).join("&")+"&majorDimension=ROWS&valueRenderOption=FORMULA";
+      const vr=(await api(u)).valueRanges;
+      tplSheets.forEach((s,k)=>{
+        const row=(vr[k].values&&vr[k].values[0])||[]; const stat=[];
+        row.forEach((c,j)=>{ const v=(c==null?"":String(c)); if(v!==""&&!v.startsWith("=")) stat.push(j); });
+        if(data[s].idx.peak!=null && !stat.includes(data[s].idx.peak)) stat.push(data[s].idx.peak); // Peak Gain always blank
+        staticCols[s]=stat;
+      });
+    }
+
     const requests=[];
-    // new rows: copy template down, then blank Peak Gain (if that column exists)
+    // new rows: copy template down (formulas + formatting), then blank every non-formula cell
     for(const n of plan.newRows){
       const d=data[n.sheet];
       if(n.row>d.rowCount){ logLine("err",`${n.sheet}: row ${n.row} exceeds grid; add blank rows first.`); continue; }
@@ -455,9 +474,9 @@ $("applyBtn").onclick=async()=>{
         source:{sheetId:d.sheetId,startRowIndex:n.template-1,endRowIndex:n.template,startColumnIndex:0,endColumnIndex:d.colCount},
         destination:{sheetId:d.sheetId,startRowIndex:n.row-1,endRowIndex:n.row,startColumnIndex:0,endColumnIndex:d.colCount},
         pasteType:"PASTE_NORMAL",pasteOrientation:"NORMAL"}});
-      if(d.idx.peak!=null){
-        requests.push({updateCells:{range:{sheetId:d.sheetId,startRowIndex:n.row-1,endRowIndex:n.row,startColumnIndex:d.idx.peak,endColumnIndex:d.idx.peak+1},
-          rows:[{values:[{}]}],fields:"userEnteredValue"}});
+      for(const [a,b] of groupRanges(staticCols[n.sheet]||[])){
+        requests.push({updateCells:{range:{sheetId:d.sheetId,startRowIndex:n.row-1,endRowIndex:n.row,startColumnIndex:a,endColumnIndex:b+1},
+          rows:[{values:Array(b-a+1).fill({})}],fields:"userEnteredValue"}});
       }
     }
     // open positions (updates + new): clear ticker cell fill to none
